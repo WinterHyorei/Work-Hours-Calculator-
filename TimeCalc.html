@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e1e1e">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Work Hours Calculator</title>
+
+<style>
+body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    background:#1e1e1e;
+    font-family:Arial;
+}
+
+/* TITLE */
+.title{
+    color:white;
+    font-size:60px;
+    margin-bottom:10px;
+    text-align:center;
+    font-weight:bold;
+}
+
+/* REMINDER */
+.reminder{
+    color:#ffcc00;
+    font-size:20px;
+    margin-bottom:15px;
+    text-align:center;
+    font-weight:bold;
+}
+
+/* Main Minecraft UI Panel */
+.panel{
+    background:#c6c6c6;
+    padding:35px 40px 45px 40px;
+    border:6px solid #373737;
+    box-shadow:
+        inset -6px -6px 0 #555,
+        inset 6px 6px 0 #fff;
+    text-align:center;
+}
+
+/* Furnace grid */
+.furnace{
+    display:grid;
+    grid-template-columns:260px 260px;
+    grid-template-rows:260px 260px;
+    gap:25px;
+    justify-content:center;
+    align-items:center;
+}
+
+/* Slot style */
+.slot{
+    width:260px;
+    height:260px;
+    background:#8b8b8b;
+    border:6px solid #3a3a3a;
+    box-shadow:
+        inset -6px -6px 0 #2a2a2a,
+        inset 6px 6px 0 #cfcfcf;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
+}
+
+/* Result slot */
+#result{
+    grid-column:2;
+    grid-row:1 / span 2;
+    font-size:44px;
+    font-weight:bold;
+    color:black;
+}
+
+/* Slot labels */
+.slot-label{
+    font-size:42px;
+    color:black;
+}
+
+/* Hidden time inputs */
+input[type="time"]{
+    position:absolute;
+    opacity:0;
+}
+
+/* Buttons */
+button{
+    margin-top:30px;
+    padding:15px 28px;
+    font-size:40px;
+    border:4px solid #373737;
+    background:#c6c6c6;
+    box-shadow:
+        inset -4px -4px 0 #555,
+        inset 4px 4px 0 #fff;
+    cursor:pointer;
+}
+button:active{
+    box-shadow:
+        inset 4px 4px 0 #555,
+        inset -4px -4px 0 #fff;
+}
+</style>
+</head>
+
+<body>
+
+<div class="title">
+WORK HOURS CALCULATOR
+</div>
+
+<div class="reminder">
+⚠️ Make sure to double-check AM / PM when setting times!
+</div>
+
+<div class="panel">
+
+<div class="furnace">
+
+<div class="slot" onclick="openPicker('start')">
+<div class="slot-label" id="startLabel">AM</div>
+<input type="time" id="start" onchange="updateLabel('start')">
+</div>
+
+<div class="slot" id="result">
+Result
+</div>
+
+<div class="slot" onclick="openPicker('end')">
+<div class="slot-label" id="endLabel">PM</div>
+<input type="time" id="end" onchange="updateLabel('end')">
+</div>
+
+</div>
+
+<button onclick="calculateTime()">Calculate</button>
+
+</div>
+
+<!-- RESET BUTTON -->
+<button onclick="resetFurnace()">Reset</button>
+
+<script>
+function openPicker(id){
+    document.getElementById(id).showPicker();
+}
+
+function updateLabel(id){
+    let value = document.getElementById(id).value;
+    if(!value) return;
+
+    let parts = value.split(":");
+    let h = parseInt(parts[0]);
+    let m = parts[1];
+
+    let ampm = id === "start" ? "AM" : "PM";
+    let displayHour = h % 12;
+    if(displayHour === 0) displayHour = 12;
+
+    document.getElementById(id+"Label").innerHTML =
+        displayHour + ":" + m + " " + ampm;
+}
+
+function calculateTime(){
+    let start = document.getElementById("start").value;
+    let end = document.getElementById("end").value;
+
+    if(!start || !end){
+        document.getElementById("result").innerHTML="Insert<br>time";
+        return;
+    }
+
+    let s = start.split(":");
+    let e = end.split(":");
+
+    let startMin = parseInt(s[0])*60 + parseInt(s[1]);
+
+    // Force PM for end slot
+    let endHour = parseInt(e[0]);
+    if(endHour < 12) endHour += 12;
+
+    let endMin = endHour*60 + parseInt(e[1]);
+    let diff = endMin - startMin;
+
+    let h = Math.floor(diff/60);
+    let m = diff % 60;
+
+    document.getElementById("result").innerHTML =
+        h + "h<br>" + m + "m";
+}
+
+// RESET FUNCTION
+function resetFurnace(){
+    document.getElementById("start").value = "";
+    document.getElementById("end").value = "";
+    document.getElementById("startLabel").innerHTML = "AM";
+    document.getElementById("endLabel").innerHTML = "PM";
+    document.getElementById("result").innerHTML = "Result";
+}
+
+
+if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js');
+}
+
+</script>
+
+</body>
+</html>
