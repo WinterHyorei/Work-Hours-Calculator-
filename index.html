@@ -21,75 +21,73 @@ body{
 }
 
 /* TITLE */
-.title{
-    color:white;
-    font-size:60px;
-    margin-bottom:10px;
-    text-align:center;
-    font-weight:bold;
+.title {
+    color: white;
+    font-size: 8vw; /* scales on small screens */
+    margin-bottom: 2vw;
+    text-align: center;
+    font-weight: bold;
 }
 
-/* REMINDER */
-.reminder{
-    color:#ffcc00;
-    font-size:20px;
-    margin-bottom:15px;
-    text-align:center;
-    font-weight:bold;
+.reminder {
+    color: #ffcc00;
+    font-size: 3.5vw; /* scales smaller */
+    margin-bottom: 3vw;
+    text-align: center;
+    font-weight: bold;
 }
 
 /* Main Minecraft UI Panel */
-.panel{
-    background:#c6c6c6;
-    padding:35px 40px 45px 40px;
-    border:6px solid #373737;
+.panel {
+    background: #c6c6c6;
+    padding: 5vw; /* responsive padding */
+    border: 6px solid #373737;
     box-shadow:
         inset -6px -6px 0 #555,
         inset 6px 6px 0 #fff;
-    text-align:center;
+    text-align: center;
+    width: 90vw;       /* 90% of viewport width */
+    max-width: 400px;  /* won't stretch too big */
 }
 
 /* Furnace grid */
-.furnace{
-    display:grid;
-    grid-template-columns:260px 260px;
-    grid-template-rows:260px 260px;
-    gap:25px;
-    justify-content:center;
-    align-items:center;
+.furnace {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* two columns, auto-sized */
+    grid-template-rows: 1fr 1fr;    /* two rows */
+    gap: 3vw;                       /* responsive gap */
+    justify-content: center;
+    align-items: center;
 }
 
 /* Slot style */
-.slot{
-    width:260px;
-    height:260px;
-    background:#8b8b8b;
-    border:6px solid #3a3a3a;
+.slot {
+    width: 100%;          /* fills grid cell */
+    aspect-ratio: 1;      /* keeps square shape */
+    min-width: 80px;      /* prevents shrinking too much */
+    max-width: 180px;     /* keeps Minecraft proportion */
+    background: #8b8b8b;
+    border: 6px solid #3a3a3a;
     box-shadow:
         inset -6px -6px 0 #2a2a2a,
         inset 6px 6px 0 #cfcfcf;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    gap:10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
 }
 
-/* Result slot */
-#result{
-    grid-column:2;
-    grid-row:1 / span 2;
-    font-size:44px;
-    font-weight:bold;
-    color:black;
+/* Result slot font */
+#result {
+    font-size: 6vw;   /* scales with viewport */
 }
 
 /* Slot labels */
-.slot-label{
-    font-size:42px;
-    color:black;
+.slot-label {
+    font-size: 4.5vw; /* scales with screen */
 }
-
+    
 /* Hidden time inputs */
 input[type="time"]{
     position:absolute;
@@ -98,9 +96,9 @@ input[type="time"]{
 
 /* Buttons */
 button{
-    margin-top:30px;
-    padding:15px 28px;
-    font-size:40px;
+    margin-top: 4vw;
+    padding: 2.5vw 4vw;  /* responsive padding */
+    font-size: 6vw;      /* scales down */
     border:4px solid #373737;
     background:#c6c6c6;
     box-shadow:
@@ -108,11 +106,26 @@ button{
         inset 4px 4px 0 #fff;
     cursor:pointer;
 }
+
+    
 button:active{
     box-shadow:
         inset 4px 4px 0 #555,
         inset -4px -4px 0 #fff;
 }
+
+@media (max-width: 350px) {
+    .furnace {
+        grid-template-columns: 1fr; /* stack AM, Result, PM vertically */
+        grid-template-rows: auto auto auto;
+    }
+
+    #result {
+        grid-column: 1;
+        grid-row: 2;
+    }
+}
+    
 </style>
 </head>
 
