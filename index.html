@@ -113,6 +113,102 @@ button:active{
         inset 4px 4px 0 #555,
         inset -4px -4px 0 #fff;
 }
+
+.lunch-toggle{
+    grid-column: 2;
+    grid-row: 3;
+
+    font-size: 4vw;
+    padding: 10px;
+
+    background:#c6c6c6;
+    border:4px solid #373737;
+
+    box-shadow:
+        inset -4px -4px 0 #555,
+        inset 4px 4px 0 #fff;
+
+    cursor:pointer;
+}
+
+.lunch-toggle.active{
+    background:#a0d080; /* green = ON */
+}
+
+.lunch-toggle{
+    grid-column: 2;
+    grid-row: 3;
+
+    justify-self: center;   /* 👈 centers horizontally */
+    width: 80%;             /* 👈 gives nice proportion */
+
+    font-size: 18px;        /* 👈 FIX: vw is too big here */
+    padding: 10px;
+
+    background:#c6c6c6;
+    border:4px solid #373737;
+
+    box-shadow:
+        inset -4px -4px 0 #555,
+        inset 4px 4px 0 #fff;
+
+    cursor:pointer;
+}
+
+
+.corporate-layer{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:#f4f4f4;
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:999;
+}
+
+.corporate-panel{
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    width:90%;
+    max-width:400px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.2);
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+
+.corporate-panel h2{
+    margin:0;
+    text-align:center;
+}
+
+.corporate-panel input{
+    padding:10px;
+    font-size:16px;
+}
+
+#corpResult{
+    font-size:24px;
+    font-weight:bold;
+    text-align:center;
+    margin-top:10px;
+}
+
+.corp-buttons{
+    display:flex;
+    gap:10px;
+    justify-content:space-between;
+}
+
+.close-btn{
+    margin-top:10px;
+    background:#ddd;
+}
+
 </style>
 </head>
 
@@ -141,6 +237,10 @@ WORK HOURS CALCULATOR
 Result
 </div>
 
+<div class="lunch-toggle" onclick="toggleLunch()" id="lunchBtn">
+Lunch: OFF
+</div>
+
 <div class="slot" onclick="openPicker('end')">
 <div class="slot-label" id="endLabel">PM</div>
 <input type="time" id="end" onchange="updateLabel('end')">
@@ -155,7 +255,52 @@ Result
 <!-- RESET BUTTON -->
 <button onclick="resetFurnace()">Reset</button>
 
+<button onclick="openCorporate()">Corporate Mode</button>
+
+
+
+<div id="corporateLayer" class="corporate-layer">
+
+    <div class="corporate-panel">
+        <h2>Work Hours Calculator</h2>
+
+        <label>Start Time</label>
+        <input type="time" id="corpStart">
+
+        <label>End Time</label>
+        <input type="time" id="corpEnd">
+
+        <div id="corpResult">Result</div>
+
+        <div class="corp-buttons">
+            <button onclick="calculateCorporate()">Calculate</button>
+            <button onclick="toggleLunch()">Lunch</button>
+            <button onclick="resetCorporate()">Reset</button>
+        </div>
+
+        <button class="close-btn" onclick="closeCorporate()">Close</button>
+    </div>
+
+</div>
+
 <script>
+
+let lunchDeduct = false;
+
+function toggleLunch(){
+    lunchDeduct = !lunchDeduct;
+
+    let btn = document.getElementById("lunchBtn");
+
+    if(lunchDeduct){
+        btn.innerHTML = "Lunch: ON";
+        btn.classList.add("active");
+    }else{
+        btn.innerHTML = "Lunch: OFF";
+        btn.classList.remove("active");
+    }
+}
+
 function openPicker(id){
     document.getElementById(id).showPicker();
 }
@@ -197,6 +342,13 @@ function calculateTime(){
     let endMin = endHour*60 + parseInt(e[1]);
     let diff = endMin - startMin;
 
+    // 🔥 APPLY LUNCH DEDUCTION
+    if(lunchDeduct){
+        diff -= 60;
+    }
+
+    if(diff < 0) diff = 0;
+
     let h = Math.floor(diff/60);
     let m = diff % 60;
 
@@ -211,11 +363,67 @@ function resetFurnace(){
     document.getElementById("startLabel").innerHTML = "AM";
     document.getElementById("endLabel").innerHTML = "PM";
     document.getElementById("result").innerHTML = "Result";
+
+    // reset lunch toggle
+    lunchDeduct = false;
+    let btn = document.getElementById("lunchBtn");
+    btn.innerHTML = "Lunch: OFF";
+    btn.classList.remove("active");
 }
 
 
 if('serviceWorker' in navigator){
     navigator.serviceWorker.register('sw.js');
+}
+
+
+function openCorporate(){
+    document.getElementById("corporateLayer").style.display = "flex";
+}
+
+function closeCorporate(){
+    document.getElementById("corporateLayer").style.display = "none";
+}
+
+function calculateCorporate(){
+    let start = document.getElementById("corpStart").value;
+    let end = document.getElementById("corpEnd").value;
+
+    if(!start || !end){
+        document.getElementById("corpResult").innerHTML = "Insert time";
+        return;
+    }
+
+    let s = start.split(":");
+    let e = end.split(":");
+
+    let startMin = parseInt(s[0])*60 + parseInt(s[1]);
+    let endMin = parseInt(e[0])*60 + parseInt(e[1]);
+
+    let diff = endMin - startMin;
+
+    if(lunchDeduct){
+        diff -= 60;
+    }
+
+    if(diff < 0) diff = 0;
+
+    let h = Math.floor(diff/60);
+    let m = diff % 60;
+
+    document.getElementById("corpResult").innerHTML =
+        h + "h " + m + "m";
+}
+
+function resetCorporate(){
+    document.getElementById("corpStart").value = "";
+    document.getElementById("corpEnd").value = "";
+    document.getElementById("corpResult").innerHTML = "Result";
+
+    // also reset shared lunch
+    lunchDeduct = false;
+    document.getElementById("lunchBtn").innerHTML = "Lunch: OFF";
+    document.getElementById("lunchBtn").classList.remove("active");
 }
 
 </script>
